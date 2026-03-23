@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+        .frame{
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: 50px;
+            gap: 0.1rem;
+            width: calc(150px + 0.2rem);
+            background: pink;
+        }
+        .square {
+            border: 1px solid black;
+            font-size: 2rem;
+            font-weight: bold;
+            color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div style="display: flex;">
+        <div>
+            <h5 id="indicator_1">Next player: X</h5>
+            <div class="frame">
+                <div class="square"></div>
+                <div class="square"></div>
+                <div class="square"></div>
+                <div class="square"></div>
+                <div class="square"></div>
+                <div class="square"></div>
+                <div class="square"></div>
+                <div class="square"></div>
+                <div class="square"></div>
+            </div>
+        </div>
+        <div id="indicator_2" style="padding: 1rem 0 0 2rem;">
+            <div class="no_1">
+                1. <button>Go to game start</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        window.addEventListener("load", function() {
+            //elements
+            const squares = document.getElementsByClassName("square");
+            const ind1 = document.getElementById("indicator_1");
+            const ind2 = document.getElementById("indicator_2");
+            const init = Array.from({length:9}).map(() => "");
+
+            //magic square
+            let magicSquare = [init];
+            
+            //about player
+            const players = {true: "O", false: "X"},
+                wins = [
+                    [0,1,2], [3,4,5], [6,7,8],
+                    [0,3,6], [1,4,7], [2,5,8],
+                    [0,4,8], [2,4,6]
+                ];
+            let currentPlayer = false, isEnded = false;
+            
+            for(const square of squares){
+                /**
+                 * 채워진것을 눌렀거나, 이미 끝난 게임인가?
+                 * yes => return
+                 * no => 아래 로직 실행
+                 * 
+                 * 과거 시점인 상태인가?
+                 * yes => 선택된 과거 시점에서 새롭게 추가
+                 * no => 현 상태에서 새롭게 추가
+                 * 
+                 */
+                square.addEventListener("click", function() {
+                    //1. exception handling
+                    if(this.innerHTML || isEnded) return;
+                    
+                    //2. mark current player to square
+                    this.innerHTML = players[currentPlayer];
+
+                    //3. check if this game is ended
+                    const currentSquare = Array.from(squares).map(sq => sq.innerHTML),
+                    currentMark = players[currentPlayer];
+
+                    isEnded = wins.some(([a, b, c]) =>
+                        currentSquare[a] === currentMark &&
+                        currentSquare[b] === currentMark &&
+                        currentSquare[c] === currentMark
+                      );
+                    const isPast = ind2.dataset.currentIdx !== null;
+
+                    if(isPast){
+                        const currIdx = +ind2.dataset.currentIdx;
+                        magicSquare = magicSquare.slice(0, currIdx + 1);
+
+                        magicSquare.at(-1).forEach(
+                            (mark, idx) => {
+                                
+                            }
+                        );
+                    }
+
+                    //. renew state
+                    magicSquare.push(currentSquare);
+                    
+                    //. switch player
+                    currentPlayer = !currentPlayer;
+
+                    ind1.innerHTML = isEnded ? `Winner: ${players[currentPlayer]}` : `Next player: ${players[currentPlayer]}`;
+
+                    if(isEnded) return;
+
+                    //add a new button
+                    const lastNumber = document.querySelectorAll("[class^='no_']").length;
+                    const newNumber = document.createElement("div");
+                    const newBtn = document.createElement("button");
+                    newBtn.innerHTML = `Go to move # ${lastNumber}`;
+                    
+                    //register click event to button
+                    newBtn.addEventListener("click", (e) => {
+                        //get index value to move
+                        const idxToMove = +e.target.parentElement.className.replace("no_", "");
+                        
+                        magicSquare[idxToMove - 1].forEach((mark, idx) => {
+                            squares[idx].innerHTML = mark;
+                        });
+
+                        ind2.dataset.currentIdx = idxToMove - 1;
+
+                        crrPly = idxToMove % 2 === 0;
+                        ind1.innerHTML = isEnded ? `Winner: ${players[crrPly]}` : `Next player: ${players[crrPly]}`;
+                    });
+                    document.getElementsByTagName("button")[0].addEventListener("click", (e) => {
+                        //get index value to move
+                        const idxToMove = +e.target.parentElement.className.replace("no_", "");
+                        
+                        magicSquare[idxToMove - 1].forEach((mark, idx) => {
+                            squares[idx].innerHTML = mark;
+                        });
+
+                        ind2.dataset.currentIdx = idxToMove - 1;
+
+                        crrPly = idxToMove % 2 === 0;
+                        ind1.innerHTML = isEnded ? `Winner: ${players[crrPly]}` : `Next player: ${players[crrPly]}`;
+                    });
+                    newNumber.className = `no_${lastNumber + 1}`;
+                    
+                    newNumber.append(`${lastNumber + 1}. `, newBtn);
+                    ind2.append(newNumber);
+                })
+            }
+        });
+    </script>
+</body>
+</html>
