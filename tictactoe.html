@@ -53,9 +53,9 @@
     <script>
         window.addEventListener("load", function() {
             //elements
-            const squares = document.getElementsByClassName("square");
-            const ind1 = document.getElementById("indicator_1");
-            const ind2 = document.getElementById("indicator_2");
+            const squares = document.querySelectorAll(".square");
+            const ind1 = document.querySelector("#indicator_1");
+            const ind2 = document.querySelector("#indicator_2");
             const init = Array.from({length:9}).map(() => "");
 
             //magic square
@@ -70,6 +70,20 @@
                 ];
             let currentPlayer = false, isEnded = false;
             
+            document.getElementsByTagName("button")[0].addEventListener("click", (e) => {                       
+                //move to past
+                const snapshot = +e.target.parentElement.className.replace("no_", "");
+                
+                magicSquare[snapshot - 1].forEach((mark, idx) => {
+                    squares[idx].innerHTML = mark;
+                });
+                
+                ind2.dataset.snapshot = snapshot;
+                
+                currentPlayer = snapshot % 2 === 0;
+                ind1.innerHTML = isEnded ? `Winner: ${players[currentPlayer]}` : `Next player: ${players[currentPlayer]}`;
+            });
+
             for(const square of squares){
                 /**
                  * 채워진것을 눌렀거나, 이미 끝난 게임인가?
@@ -77,86 +91,77 @@
                  * no => 아래 로직 실행
                  * 
                  * 과거 시점인 상태인가?
-                 * yes => 선택된 과거 시점에서 새롭게 추가
-                 * no => 현 상태에서 새롭게 추가
+                 * yes => 현 시점 이후의 버튼 제거
                  * 
+                 * 버튼 추가
+                 * 버튼 이벤트 추가
+                 * 
+                 * 플레이어 변경
+                 * 문구 변경
                  */
                 square.addEventListener("click", function() {
-                    //1. exception handling
+                    //exception handling
                     if(this.innerHTML || isEnded) return;
                     
-                    //2. mark current player to square
-                    this.innerHTML = players[currentPlayer];
-
-                    //3. check if this game is ended
-                    const currentSquare = Array.from(squares).map(sq => sq.innerHTML),
-                    currentMark = players[currentPlayer];
-
-                    isEnded = wins.some(([a, b, c]) =>
-                        currentSquare[a] === currentMark &&
-                        currentSquare[b] === currentMark &&
-                        currentSquare[c] === currentMark
-                      );
-                    const isPast = ind2.dataset.currentIdx !== null;
-
-                    if(isPast){
-                        const currIdx = +ind2.dataset.currentIdx;
-                        magicSquare = magicSquare.slice(0, currIdx + 1);
-
-                        magicSquare.at(-1).forEach(
-                            (mark, idx) => {
-                                
-                            }
-                        );
-                    }
-
-                    //. renew state
-                    magicSquare.push(currentSquare);
                     
-                    //. switch player
-                    currentPlayer = !currentPlayer;
-
-                    ind1.innerHTML = isEnded ? `Winner: ${players[currentPlayer]}` : `Next player: ${players[currentPlayer]}`;
-
-                    if(isEnded) return;
+                    const isPast = !!ind2.dataset.snapshot;
+                    
+                    if(isPast){
+                        //remove future buttons
+                        const snapshot = +ind2.dataset.snapshot;
+                        magicSquare = magicSquare.slice(0, snapshot);
+                        
+                        document
+                        .querySelectorAll(`[class^="no_"]:nth-child(n + ${snapshot + 1})`)
+                        .forEach(no => no.remove());
+                    }                    
+                    
+                    delete ind2.dataset.snapshot;
 
                     //add a new button
                     const lastNumber = document.querySelectorAll("[class^='no_']").length;
                     const newNumber = document.createElement("div");
                     const newBtn = document.createElement("button");
                     newBtn.innerHTML = `Go to move # ${lastNumber}`;
-                    
-                    //register click event to button
-                    newBtn.addEventListener("click", (e) => {
-                        //get index value to move
-                        const idxToMove = +e.target.parentElement.className.replace("no_", "");
-                        
-                        magicSquare[idxToMove - 1].forEach((mark, idx) => {
-                            squares[idx].innerHTML = mark;
-                        });
-
-                        ind2.dataset.currentIdx = idxToMove - 1;
-
-                        crrPly = idxToMove % 2 === 0;
-                        ind1.innerHTML = isEnded ? `Winner: ${players[crrPly]}` : `Next player: ${players[crrPly]}`;
-                    });
-                    document.getElementsByTagName("button")[0].addEventListener("click", (e) => {
-                        //get index value to move
-                        const idxToMove = +e.target.parentElement.className.replace("no_", "");
-                        
-                        magicSquare[idxToMove - 1].forEach((mark, idx) => {
-                            squares[idx].innerHTML = mark;
-                        });
-
-                        ind2.dataset.currentIdx = idxToMove - 1;
-
-                        crrPly = idxToMove % 2 === 0;
-                        ind1.innerHTML = isEnded ? `Winner: ${players[crrPly]}` : `Next player: ${players[crrPly]}`;
-                    });
                     newNumber.className = `no_${lastNumber + 1}`;
-                    
                     newNumber.append(`${lastNumber + 1}. `, newBtn);
-                    ind2.append(newNumber);
+                    ind2.append(newNumber);                    
+                    
+                    //register click event to the button
+                    newBtn.addEventListener("click", (e) => {
+                        isEnded = false;
+                        //move to past
+                        const snapshot = +e.target.parentElement.className.replace("no_", "");
+                        
+                        magicSquare[snapshot - 1].forEach((mark, idx) => {
+                            squares[idx].innerHTML = mark;
+                        });
+                        
+                        ind2.dataset.snapshot = snapshot;
+                        
+                        currentPlayer = snapshot % 2 === 0;
+                        ind1.innerHTML = isEnded ? `Winner: ${players[currentPlayer]}` : `Next player: ${players[currentPlayer]}`;
+                    });
+                    
+                    //mark to square
+                    this.innerHTML = players[currentPlayer];
+
+                    const currentSquare = Array.from(squares).map(sq => sq.innerHTML),
+                        currentMark = players[currentPlayer];
+                    magicSquare.push(currentSquare);
+                    
+                    isEnded = wins.some(
+                        ([a, b, c]) =>
+                        currentSquare[a] === currentMark &&
+                        currentSquare[b] === currentMark &&
+                        currentSquare[c] === currentMark
+                    );
+                    currentPlayer = !currentPlayer;
+                    
+                    ind1.innerHTML = isEnded ?
+                        `Winner: ${players[!currentPlayer]}` :
+                        `Next player: ${players[currentPlayer]}`;
+                    
                 })
             }
         });
