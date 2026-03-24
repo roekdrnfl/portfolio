@@ -1,170 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-        html, body {
-            width: 100%;
-            height: 100%;
-        }
-        .frame{
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-auto-rows: 50px;
-            gap: 0.1rem;
-            width: calc(150px + 0.2rem);
-            background: pink;
-        }
-        .square {
-            border: 1px solid black;
-            font-size: 2rem;
-            font-weight: bold;
-            color: black;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-    </style>
-</head>
-<body>
-    <div style="display: flex;">
-        <div>
-            <h5 id="indicator_1">Next player: X</h5>
-            <div class="frame">
-                <div class="square"></div>
-                <div class="square"></div>
-                <div class="square"></div>
-                <div class="square"></div>
-                <div class="square"></div>
-                <div class="square"></div>
-                <div class="square"></div>
-                <div class="square"></div>
-                <div class="square"></div>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <style>
+            html,
+            body {
+                width: 100%;
+                height: 100%;
+            }
+            .frame {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                grid-auto-rows: 50px;
+                gap: 0.1rem;
+                width: calc(150px + 0.2rem);
+                background: pink;
+            }
+            .square {
+                border: 1px solid black;
+                font-size: 2rem;
+                font-weight: bold;
+                color: black;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div style="display: flex;">
+            <div>
+                <h5 id="information">Next player: X</h5>
+                <div class="frame">
+                    <div class="square"></div>
+                    <div class="square"></div>
+                    <div class="square"></div>
+                    <div class="square"></div>
+                    <div class="square"></div>
+                    <div class="square"></div>
+                    <div class="square"></div>
+                    <div class="square"></div>
+                    <div class="square"></div>
+                </div>
+            </div>
+            <div id="snapshot" style="padding: 1rem 0 0 2rem;">
+                <div class="no_1">
+                    1. <button>Go to game start</button>
+                </div>
             </div>
         </div>
-        <div id="indicator_2" style="padding: 1rem 0 0 2rem;">
-            <div class="no_1">
-                1. <button>Go to game start</button>
-            </div>
-        </div>
-    </div>
-    <script>
-        window.addEventListener("load", function() {
-            //elements
-            const squares = document.querySelectorAll(".square");
-            const ind1 = document.querySelector("#indicator_1");
-            const ind2 = document.querySelector("#indicator_2");
-            const init = Array.from({length:9}).map(() => "");
+        <script>
+            window.onload = () => {
+                //elements
+                const squares = document.querySelectorAll(".square");
+                const info = document.querySelector("#information");
+                const snapshot = document.querySelector("#snapshot");
 
-            //magic square
-            let magicSquare = [init];
-            
-            //about player
-            const players = {true: "O", false: "X"},
-                wins = [
-                    [0,1,2], [3,4,5], [6,7,8],
-                    [0,3,6], [1,4,7], [2,5,8],
-                    [0,4,8], [2,4,6]
-                ];
-            let currentPlayer = false, isEnded = false;
-            
-            document.getElementsByTagName("button")[0].addEventListener("click", (e) => {                       
-                //move to past
-                const snapshot = +e.target.parentElement.className.replace("no_", "");
-                
-                magicSquare[snapshot - 1].forEach((mark, idx) => {
+                //variables for game
+                const len = 3, players = { true: "O", false: "X" },
+                    initial = Array.from({ length: len ** 2 }).map(() => ""),
+                    /* ! only this section was assisted by AI*/
+                    wins = (n => {
+                        const cases = [];
+
+                        for (let i = 0; i < n; i++) {
+                            cases.push(Array.from({ length: n }, (_, j) => i * n + j));
+                            cases.push(Array.from({ length: n }, (_, j) => j * n + i));
+                        }
+                        cases.push(Array.from({ length: n }, (_, i) => i * (n + 1)));
+                        cases.push(Array.from({ length: n }, (_, i) => (i + 1) * (n - 1)));
+
+                        return cases;
+                    })(len);
+
+                let score = [initial], currentPlayer = false, isEnded = false;
+
+                function GenerateInfo(){                    
+                    const isDone = score.at(-1).every(mk => mk !== "");
+                    
+                    info.innerHTML = isDone ?
+                        (isEnded ? `Winner: ${players[!currentPlayer]}` : `Draw`) :
+                        `Next player: ${players[currentPlayer]}`;
+                }
+
+                function MoveToPast(e){
+                    //move to past
+                    const crrSnap = +e.target.parentElement.className.match(/\d/)[0];
+
+                    score[crrSnap - 1].forEach((mark, idx) => {
                     squares[idx].innerHTML = mark;
-                });
-                
-                ind2.dataset.snapshot = snapshot;
-                
-                currentPlayer = snapshot % 2 === 0;
-                ind1.innerHTML = isEnded ? `Winner: ${players[currentPlayer]}` : `Next player: ${players[currentPlayer]}`;
-            });
+                    });
 
-            for(const square of squares){
-                /**
-                 * 채워진것을 눌렀거나, 이미 끝난 게임인가?
-                 * yes => return
-                 * no => 아래 로직 실행
-                 * 
-                 * 과거 시점인 상태인가?
-                 * yes => 현 시점 이후의 버튼 제거
-                 * 
-                 * 버튼 추가
-                 * 버튼 이벤트 추가
-                 * 
-                 * 플레이어 변경
-                 * 문구 변경
-                 */
-                square.addEventListener("click", function() {
-                    //exception handling
-                    if(this.innerHTML || isEnded) return;
-                    
-                    
-                    const isPast = !!ind2.dataset.snapshot;
-                    
-                    if(isPast){
-                        //remove future buttons
-                        const snapshot = +ind2.dataset.snapshot;
-                        magicSquare = magicSquare.slice(0, snapshot);
-                        
-                        document
-                        .querySelectorAll(`[class^="no_"]:nth-child(n + ${snapshot + 1})`)
-                        .forEach(no => no.remove());
-                    }                    
-                    
-                    delete ind2.dataset.snapshot;
+                    snapshot.dataset.snap = crrSnap;
 
-                    //add a new button
+                    currentPlayer = crrSnap % 2 === 0;
+                    GenerateInfo();
+                }
+
+                function AddNewBtn(){
                     const lastNumber = document.querySelectorAll("[class^='no_']").length;
                     const newNumber = document.createElement("div");
                     const newBtn = document.createElement("button");
                     newBtn.innerHTML = `Go to move # ${lastNumber}`;
                     newNumber.className = `no_${lastNumber + 1}`;
                     newNumber.append(`${lastNumber + 1}. `, newBtn);
-                    ind2.append(newNumber);                    
-                    
-                    //register click event to the button
-                    newBtn.addEventListener("click", (e) => {
-                        isEnded = false;
-                        //move to past
-                        const snapshot = +e.target.parentElement.className.replace("no_", "");
-                        
-                        magicSquare[snapshot - 1].forEach((mark, idx) => {
-                            squares[idx].innerHTML = mark;
-                        });
-                        
-                        ind2.dataset.snapshot = snapshot;
-                        
-                        currentPlayer = snapshot % 2 === 0;
-                        ind1.innerHTML = isEnded ? `Winner: ${players[currentPlayer]}` : `Next player: ${players[currentPlayer]}`;
-                    });
-                    
-                    //mark to square
-                    this.innerHTML = players[currentPlayer];
+                    snapshot.append(newNumber);
 
-                    const currentSquare = Array.from(squares).map(sq => sq.innerHTML),
-                        currentMark = players[currentPlayer];
-                    magicSquare.push(currentSquare);
-                    
-                    isEnded = wins.some(
-                        ([a, b, c]) =>
-                        currentSquare[a] === currentMark &&
-                        currentSquare[b] === currentMark &&
-                        currentSquare[c] === currentMark
-                    );
-                    currentPlayer = !currentPlayer;
-                    
-                    ind1.innerHTML = isEnded ?
-                        `Winner: ${players[!currentPlayer]}` :
-                        `Next player: ${players[currentPlayer]}`;
-                    
+                    //register click event to the button
+                    newBtn.addEventListener("click", moveToPast);
+                }
+
+                function RemoveBtns(){
+                    const crrSnap = +snapshot.dataset.snap;
+                    score = score.slice(0, crrSnap);
+
+                    document
+                        .querySelectorAll(`[class^="no_"]:nth-child(n + ${crrSnap + 1})`)
+                        .forEach(no => no.remove());
+                }
+
+                document.getElementsByTagName("button")[0].addEventListener("click", moveToPast);
+
+                squares.forEach(square => {
+                    square.addEventListener("click", function () {
+                        //exception handling
+                        if (this.innerHTML || isEnded) return;
+
+                        //if past
+                        !!snapshot.dataset.snap && RemoveBtns();
+                        
+                        snapshot.dataset.snap && delete snapshot.dataset.snap;
+
+                        AddNewBtn();
+
+                        //mark to square
+                        this.innerHTML = players[currentPlayer];
+
+                        const currentSquare = Array.from(squares).map(sq => sq.innerHTML),
+                            currentMark = players[currentPlayer];
+                        score.push(currentSquare);
+
+                        isEnded = wins.some(
+                            ([a, b, c]) =>
+                            currentSquare[a] === currentMark &&
+                            currentSquare[b] === currentMark &&
+                            currentSquare[c] === currentMark
+                        );
+                        currentPlayer = !currentPlayer;
+
+                        GenerateInfo();
+                    })
                 })
             }
-        });
-    </script>
-</body>
+        </script>
+    </body>
 </html>
