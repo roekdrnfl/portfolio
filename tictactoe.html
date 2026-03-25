@@ -86,7 +86,6 @@
                 }
 
                 function MoveToPast(e){
-                    //move to past
                     const crrSnap = +e.target.parentElement.className.match(/\d/)[0];
 
                     score[crrSnap - 1].forEach((mark, idx) => {
@@ -99,17 +98,8 @@
                     GenerateInfo();
                 }
 
-                function AddNewBtn(){
-                    const lastNumber = document.querySelectorAll("[class^='no_']").length;
-                    const newNumber = document.createElement("div");
-                    const newBtn = document.createElement("button");
-                    newBtn.innerHTML = `Go to move # ${lastNumber}`;
-                    newNumber.className = `no_${lastNumber + 1}`;
-                    newNumber.append(`${lastNumber + 1}. `, newBtn);
-                    snapshot.append(newNumber);
-
-                    //register click event to the button
-                    newBtn.addEventListener("click", moveToPast);
+                function DeleteSnapshotIfPast(){
+                    snapshot.dataset.snap && delete snapshot.dataset.snap;
                 }
 
                 function RemoveBtns(){
@@ -121,7 +111,38 @@
                         .forEach(no => no.remove());
                 }
 
-                document.getElementsByTagName("button")[0].addEventListener("click", moveToPast);
+                function AddNewBtn(){
+                    const lastNumber = document.querySelectorAll("[class^='no_']").length;
+                    const newNumber = document.createElement("div");
+                    const newBtn = document.createElement("button");
+                    newBtn.innerHTML = `Go to move # ${lastNumber}`;
+                    newNumber.className = `no_${lastNumber + 1}`;
+                    newNumber.append(`${lastNumber + 1}. `, newBtn);
+                    snapshot.append(newNumber);
+
+                    //register click event to the button
+                    newBtn.addEventListener("click", MoveToPast);
+                }
+
+                function RenderMarkTo(sq){
+                    sq.innerHTML = players[currentPlayer];
+                }
+
+                function UpdateStatus(){
+                    const currentSquare = Array.from(squares).map(sq => sq.innerHTML),
+                            currentMark = players[currentPlayer];
+                    score.push(currentSquare);
+
+                    isEnded = wins.some(
+                        ([a, b, c]) =>
+                        currentSquare[a] === currentMark &&
+                        currentSquare[b] === currentMark &&
+                        currentSquare[c] === currentMark
+                    );
+                    currentPlayer = !currentPlayer;
+                }
+
+                document.getElementsByTagName("button")[0].addEventListener("click", MoveToPast);
 
                 squares.forEach(square => {
                     square.addEventListener("click", function () {
@@ -131,24 +152,13 @@
                         //if past
                         !!snapshot.dataset.snap && RemoveBtns();
                         
-                        snapshot.dataset.snap && delete snapshot.dataset.snap;
+                        DeleteSnapshotIfPast();
 
                         AddNewBtn();
 
-                        //mark to square
-                        this.innerHTML = players[currentPlayer];
+                        RenderMarkTo(square);
 
-                        const currentSquare = Array.from(squares).map(sq => sq.innerHTML),
-                            currentMark = players[currentPlayer];
-                        score.push(currentSquare);
-
-                        isEnded = wins.some(
-                            ([a, b, c]) =>
-                            currentSquare[a] === currentMark &&
-                            currentSquare[b] === currentMark &&
-                            currentSquare[c] === currentMark
-                        );
-                        currentPlayer = !currentPlayer;
+                        UpdateStatus();
 
                         GenerateInfo();
                     })
