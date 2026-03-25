@@ -77,19 +77,29 @@
 
                 let score = [initial], currentPlayer = false, isEnded = false;
 
-                function GenerateInfo(){                    
-                    const isDone = score.at(-1).every(mk => mk !== "");
-                    
-                    info.innerHTML = isDone ?
-                        (isEnded ? `Winner: ${players[!currentPlayer]}` : `Draw`) :
-                        `Next player: ${players[currentPlayer]}`;
+                function IsSomeoneWin(){
+                    const currentSquare = Array.from(squares).map(sq => sq.innerHTML),
+                        currentMark = players[!currentPlayer];
+                    return wins.some(
+                        ([a, b, c]) =>
+                            currentSquare[a] === currentMark &&
+                            currentSquare[b] === currentMark &&
+                            currentSquare[c] === currentMark
+                    );
                 }
 
-                function MoveToPast(e){
+                function GenerateInfo(){                    
+                    const isWholeFilled = score.at(-1).every(mk => mk !== "");
+                 
+                    info.innerHTML = IsSomeoneWin() ? `Winner: ${players[!currentPlayer]}` :
+                        (isWholeFilled ? `Draw` : `Next player: ${players[currentPlayer]}`);
+                }
+
+                function MoveToPast(e) {
                     const crrSnap = +e.target.parentElement.className.match(/\d/)[0];
 
                     score[crrSnap - 1].forEach((mark, idx) => {
-                    squares[idx].innerHTML = mark;
+                        squares[idx].innerHTML = mark;
                     });
 
                     snapshot.dataset.snap = crrSnap;
@@ -130,15 +140,9 @@
 
                 function UpdateStatus(){
                     const currentSquare = Array.from(squares).map(sq => sq.innerHTML),
-                            currentMark = players[currentPlayer];
+                        currentMark = players[currentPlayer];
                     score.push(currentSquare);
 
-                    isEnded = wins.some(
-                        ([a, b, c]) =>
-                        currentSquare[a] === currentMark &&
-                        currentSquare[b] === currentMark &&
-                        currentSquare[c] === currentMark
-                    );
                     currentPlayer = !currentPlayer;
                 }
 
@@ -147,7 +151,7 @@
                 squares.forEach(square => {
                     square.addEventListener("click", function () {
                         //exception handling
-                        if (this.innerHTML || isEnded) return;
+                        if (this.innerHTML || IsSomeoneWin()) return;
 
                         //if past
                         !!snapshot.dataset.snap && RemoveBtns();
