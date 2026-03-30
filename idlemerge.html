@@ -13,13 +13,49 @@
             #jungle {
                 width: 100%;
                 height: 100%;
-                background: center / 100% no-repeat url("jungle.png")
+                background: center / 100% no-repeat url("./images/jungle.png")
+            }
+            #controller-container {
+                position: absolute;
+                top: 90%;
+                display: flex;
+                width: 100%;
+                height: 10%;
+                padding: 0;
+                box-sizing: border-box;
+                flex-direction: row-reverse;
+            }
+            #generator {
+                display: flex;
+                width: 10%;
+                height: 100%;
+                border-style: ridge;
+                border-radius: 0.5rem;
+                --hdr-gradient: linear-gradient(
+                  116deg in oklab,
+                  oklch(90% 0.19 123) 42%,
+                  72%,
+                  oklch(70% 0.2 155)  96%
+                );
+                --sdr-gradient: linear-gradient(116deg, #c7f24f 42%, 72%, #00c063 96%);
+                background: var(--hdr-gradient);
             }
         </style>
+        <script type="module" src="./scripts/idlemerge/gamecontroller.js"></script>
     </head>
     <body>
         <div id="jungle">
-            <img src="monkeys_v1.png" style="position: absolute; top: calc(50% - 145px / 2); left: calc(50% - 348px / 2);"/>
+            <div id="controller-container">
+                <button id="generator">
+                    <div style="width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <img src="./images/banana.png" style="height: 70%;"/>
+                    </div>
+                    <div style="width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.5rem; font-family: fantasy;">
+                        <div>feed</div>
+                        <div id="remaining" style="font-size: 1rem;"></div>
+                    </div>
+                </button>
+            </div>
         </div>
     </body>
 </html>
