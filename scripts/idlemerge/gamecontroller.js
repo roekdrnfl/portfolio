@@ -60,6 +60,8 @@ window.onload = function() {
             branch.src = "./images/branch.png";
             branch.style.height = `${sizeOfBranch}px`;
             branch.style.zIndex = 0;
+            
+            monkeyCount.innerText = `${document.querySelectorAll(`[src^="./images/monkey_lv"]:not(:first-child)`).length} / 10`;                    
 
             jungle.appendChild(incomeInfo);
 
@@ -73,7 +75,6 @@ window.onload = function() {
                     finance += income;
 
                     financeDiv.innerText = finance;
-                    monkeyCount.innerText = `${document.querySelectorAll(`[src^="./images/monkey_lv"]:not(:first-child)`).length} / 10`;                    
                 }
             }, 800);
             
