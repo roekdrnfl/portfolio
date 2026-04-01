@@ -1,11 +1,14 @@
 window.onload = function() {
     const jungle = document.querySelector("#jungle"),
         gen = document.querySelector("#generator"),
-        remaining = document.querySelector("#remaining");
+        remaining = document.querySelector("#remaining"),
+        inventory = document.querySelector("#inventory"), 
+        monkeyCount = document.querySelector("#monkey_count div:last-child"),
+        financeDiv = document.querySelector("#finance div:last-child");
     
-    const max = 10, sizeOfBanana = 40, sizeOfBranch = 25;
+    const max = 10, sizeOfBanana = 40, sizeOfMonkey = sizeOfBanana * 1.5, sizeOfBranch = 25, income = 3;
 
-    let remain = 10;
+    let remain = 10, finance = 0;
 
     remaining.innerText = `(${remain} / ${max})`;
 
@@ -24,8 +27,8 @@ window.onload = function() {
             ),
             adjustedY = randomY - sizeOfBanana - sizeOfBranch < 0 ? sizeOfBranch :
                 (
-                    randomY + sizeOfBanana > window.innerHeight ?
-                    window.innerHeight - sizeOfBanana : randomY
+                    randomY + sizeOfMonkey > window.innerHeight ?
+                    window.innerHeight - sizeOfMonkey : randomY
                 );
 
         const banana = document.createElement("img");
@@ -39,34 +42,41 @@ window.onload = function() {
         jungle.appendChild(banana);
 
         setTimeout(() => {
-            const monkey = banana, sizeOfMonkey = sizeOfBanana * 1.5, income = 3;
+            const monkey = banana;
             monkey.src = "./images/monkey_lv1.png";
             monkey.style.height = `${sizeOfMonkey}px`;
             
-            const div = document.createElement("div");
-            div.style.position = "absolute";
-            div.style.zIndex = 0;
-            div.style.top = `${adjustedY - sizeOfBranch}px`;
-            div.style.left = `${adjustedX}px`;
-            div.style.display = "flex";
-            div.style.alignItems = "center";
-            div.style.color = "white";
-            div.style.fontWeight = "bold";
+            const incomeInfo = document.createElement("div");
+            incomeInfo.style.position = "absolute";
+            incomeInfo.style.zIndex = 0;
+            incomeInfo.style.top = `${adjustedY - sizeOfBranch}px`;
+            incomeInfo.style.left = `${adjustedX}px`;
+            incomeInfo.style.display = "flex";
+            incomeInfo.style.alignItems = "center";
+            incomeInfo.style.color = "white";
+            incomeInfo.style.fontWeight = "bold";
 
             const branch = document.createElement("img");
             branch.src = "./images/branch.png";
             branch.style.height = `${sizeOfBranch}px`;
             branch.style.zIndex = 0;
 
-            setTimeout(() => {
-                div.append(branch, ` +${income}`);
-                jungle.appendChild(div);
-            }, 800);
+            jungle.appendChild(incomeInfo);
 
+            setInterval(() => {
+                if(!!incomeInfo.innerHTML){
+                    incomeInfo.innerHTML = null;
+                }
+                else{
+                    incomeInfo.append(branch, ` +${income}`);
+                    
+                    finance += income;
+
+                    financeDiv.innerText = finance;
+                    monkeyCount.innerText = `${document.querySelectorAll(`[src^="./images/monkey_lv"]:not(:first-child)`).length} / 10`;                    
+                }
+            }, 800);
             
-            setTimeout(() => {
-                div.remove();
-            }, 1600);
         }, 1500);
     });
 }
