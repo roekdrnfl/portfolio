@@ -4,63 +4,27 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Idle merge</title>
-        <style>            
-            html, body {
-                width: 100%;
-                height: 100%;
-                margin: 0;
-            }
-            #jungle {
-                width: 100%;
-                height: 100%;
-                background: center / 100% no-repeat url("./images/jungle.png")
-            }
-            #controller-container {
-                position: absolute;
-                top: 90%;
-                display: flex;
-                width: 100%;
-                height: 10%;
-                padding: 0;
-                box-sizing: border-box;
-                flex-direction: row-reverse;
-            }
-            #generator {
-                display: flex;
-                width: 10%;
-                height: 100%;
-                border-style: ridge;
-                border-radius: 0.5rem;
-                --hdr-gradient: linear-gradient(
-                  116deg in oklab,
-                  oklch(90% 0.19 123) 42%,
-                  72%,
-                  oklch(70% 0.2 155)  96%
-                );
-                --sdr-gradient: linear-gradient(116deg, #c7f24f 42%, 72%, #00c063 96%);
-                background: var(--hdr-gradient);
-            }
-        </style>
+        <link rel="stylesheet" href="./styles/idlemerge.css" />
         <script type="module" src="./scripts/idlemerge/gamecontroller.js"></script>
     </head>
     <body>
         <div id="jungle">
-            <div id="inventory">
-                <div id="monkey_count">
-                    <div><img src="./images/monkey_lv1.png" /></div>
-                    <div></div>
+            <div id="aggregation" class="interface flexbox">
+                <div id="agg-monkey" class="flexbox">
+                    <div><img src="./images/monkey_lv1.png"/></div>
+                    <div class="quantity"></div>
                 </div>
-                <div id="finance">
-                    <div><img src="./images/branch.png" /></div>
-                    <div></div>
+                <div id="agg-branch" class="flexbox">
+                    <div><img src="./images/branch.png"/></div>
+                    <div class="quantity"></div>
                 </div>
             </div>
-            <div id="controller-container">
+            <div id="contents" class="interface flexbox">
                 <button id="generator">
-                    <div style="width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div class="flexbox centered column half-width">
                         <img src="./images/banana.png" style="height: 70%;"/>
                     </div>
-                    <div style="width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.5rem; font-family: fantasy;">
+                    <div class="flexbox centered column half-width" style="font-size: 1.5rem; font-family: fantasy;">
                         <div>feed</div>
                         <div id="remaining" style="font-size: 1rem;"></div>
                     </div>

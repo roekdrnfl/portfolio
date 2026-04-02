@@ -1,0 +1,60 @@
+/** common styles **/
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    color: white;
+}
+.half-width {
+    width: 50%;
+}
+.flexbox {
+    display: flex;                
+}
+.flexbox.centered {
+    align-items: center;
+    justify-content: center;
+}
+.flexbox.column {
+    flex-direction: column;
+}
+/** user interface **/
+#jungle {
+    width: 100%;
+    height: 100%;
+    background: center / 100% no-repeat url("../images/jungle.png")
+}
+#contents {
+    top: 90%;
+    height: 10%;
+    flex-direction: row-reverse;
+}
+#aggregation {
+    height: 10%;
+    top: 0;
+}
+.interface {
+    position: absolute;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0;
+}
+#generator {
+    display: flex;
+    width: 10%;
+    height: 100%;
+    border-style: ridge;
+    border-radius: 0.5rem;
+    --hdr-gradient: linear-gradient(
+        116deg in oklab,
+        oklch(90% 0.19 123) 42%,
+        72%,
+        oklch(70% 0.2 155)  96%
+    );
+    --sdr-gradient: linear-gradient(116deg, #c7f24f 42%, 72%, #00c063 96%);
+    background: var(--hdr-gradient);
+}
+[id^="agg-"] .quantity {
+    font-size: 1.5rem;
+    font-weight: bold;
+}

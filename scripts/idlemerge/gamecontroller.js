@@ -2,7 +2,7 @@ window.onload = function() {
     const jungle = document.querySelector("#jungle"),
         gen = document.querySelector("#generator"),
         remaining = document.querySelector("#remaining"),
-        inventory = document.querySelector("#inventory"), 
+        aggregation = document.querySelector("#aggregation"), 
         monkeyCount = document.querySelector("#monkey_count div:last-child"),
         financeDiv = document.querySelector("#finance div:last-child");
     
